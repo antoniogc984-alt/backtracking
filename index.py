@@ -3,7 +3,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-
 # ===================== MODELOS Pydantic =====================
 
 class Edge(BaseModel):
@@ -34,15 +33,11 @@ class SolveResponse(BaseModel):
 
 app = FastAPI(title="Coloreo de mapas - Backtracking API")
 
-origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
-
+# CORS: permitir TODOS los orígenes
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
+    allow_origins=["*"],       # 🔓 permitir cualquier origen
+    allow_credentials=False,   # con "*" debe ser False
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -50,7 +45,7 @@ app.add_middleware(
 
 @app.get("/")
 def root():
-  return {"message": "API de backtracking funcionando"}
+    return {"message": "API de backtracking funcionando 🚀"}
 
 
 # ===================== LÓGICA DE BACKTRACKING =====================
@@ -85,7 +80,7 @@ def solve_backtracking(
 ) -> List[Step]:
     """
     Backtracking para coloreo de grafos.
-    
+    Se queda SOLO con la primera solución encontrada.
     """
     steps: List[Step] = []
     assignment: Dict[str, int] = {}
@@ -96,7 +91,7 @@ def solve_backtracking(
             steps.append(
                 Step(
                     assignment=dict(assignment),
-                    note="Solución completa encontrada."
+                    note="✅ Solución completa encontrada."
                 )
             )
             # Detenernos en la primera solución
@@ -125,7 +120,7 @@ def solve_backtracking(
                 steps.append(
                     Step(
                         assignment=dict(assignment),
-                        note=f"Conflicto: el nodo {node} con color {color} "
+                        note=f"❌ Conflicto: el nodo {node} con color {color} "
                              f"choca con alguno de sus vecinos."
                     )
                 )
@@ -146,6 +141,7 @@ def solve_backtracking(
     return steps
 
 
+# ===================== ENDPOINT PRINCIPAL =====================
 
 @app.post("/solve", response_model=SolveResponse)
 def solve(request: SolveRequest):
